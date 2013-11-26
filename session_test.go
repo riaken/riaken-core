@@ -1,0 +1,46 @@
+package riaken_core
+
+import (
+	"testing"
+)
+
+func TestMultipleSession(t *testing.T) {
+	client := dial()
+	defer client.Close()
+	s1, err := client.Session()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	defer s1.Close()
+	s2, err := client.Session()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	defer s2.Close()
+
+	s1name := "session-1"
+	s2name := "session-2"
+
+	if _, err := s1.SetClientId([]byte(s1name)); err != nil {
+		t.Error(err.Error())
+	}
+	if _, err := s2.SetClientId([]byte(s2name)); err != nil {
+		t.Error(err.Error())
+	}
+
+	out1, err := s1.GetClientId()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if string(out1.GetClientId()) != s1name {
+		t.Errorf("expected: %s, got: %s", s1name, string(out1.GetClientId()))
+	}
+
+	out2, err := s2.GetClientId()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if string(out2.GetClientId()) != s2name {
+		t.Errorf("expected: %s, got: %s", s2name, string(out2.GetClientId()))
+	}
+}
