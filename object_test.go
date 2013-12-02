@@ -11,16 +11,12 @@ import (
 func TestObject(t *testing.T) {
 	client := dial()
 	defer client.Close()
-	session, err := client.Session()
-	if err != nil {
-		t.Error(err.Error())
-	}
-	defer session.Close()
+	session := client.Session()
+	defer session.Release()
 
 	bucket := session.GetBucket("b1")
 	object := bucket.Object("o1")
-	_, err = object.Store([]byte("o1-data"))
-	if err != nil {
+	if _, err := object.Store([]byte("o1-data")); err != nil {
 		t.Error(err.Error())
 	}
 	data, err := object.Fetch()
@@ -42,11 +38,8 @@ func TestObject(t *testing.T) {
 func TestDoObject(t *testing.T) {
 	client := dial()
 	defer client.Close()
-	session, err := client.Session()
-	if err != nil {
-		t.Error(err.Error())
-	}
-	defer session.Close()
+	session := client.Session()
+	defer session.Release()
 
 	bucket := session.GetBucket("b1")
 	object := bucket.Object("o1")

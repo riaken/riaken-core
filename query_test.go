@@ -15,35 +15,28 @@ import (
 func TestMapReduce(t *testing.T) {
 	client := dial()
 	defer client.Close()
-	session, err := client.Session()
-	if err != nil {
-		t.Error(err.Error())
-	}
-	defer session.Close()
+	session := client.Session()
+	defer session.Release()
 
 	// Test Data
 	bucket := session.GetBucket("training")
 	object1 := bucket.Object("foo")
-	_, err = object1.Store([]byte("pizza data goes here"))
-	if err != nil {
+	if _, err := object1.Store([]byte("pizza data goes here")); err != nil {
 		t.Error(err.Error())
 	}
 
 	object2 := bucket.Object("bar")
-	_, err = object2.Store([]byte("pizza pizza pizza pizza"))
-	if err != nil {
+	if _, err := object2.Store([]byte("pizza pizza pizza pizza")); err != nil {
 		t.Error(err.Error())
 	}
 
 	object3 := bucket.Object("baz")
-	_, err = object3.Store([]byte("nothing to see here"))
-	if err != nil {
+	if _, err := object3.Store([]byte("nothing to see here")); err != nil {
 		t.Error(err.Error())
 	}
 
 	object4 := bucket.Object("bam")
-	_, err = object4.Store([]byte("pizza pizza pizza"))
-	if err != nil {
+	if _, err := object4.Store([]byte("pizza pizza pizza")); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -116,11 +109,8 @@ func TestMapReduce(t *testing.T) {
 func TestSecondaryIndexes(t *testing.T) {
 	client := dial()
 	defer client.Close()
-	session, err := client.Session()
-	if err != nil {
-		t.Error(err.Error())
-	}
-	defer session.Close()
+	session := client.Session()
+	defer session.Release()
 
 	// Setup
 	bucket := session.GetBucket("b1")
@@ -163,16 +153,12 @@ func TestSecondaryIndexes(t *testing.T) {
 func TestSearch(t *testing.T) {
 	client := dial()
 	defer client.Close()
-	session, err := client.Session()
-	if err != nil {
-		t.Error(err.Error())
-	}
-	defer session.Close()
+	session := client.Session()
+	defer session.Release()
 
 	// Set bucket properties.
 	// Unfortunately these still aren't exposed via PBC, so do it manually with curl.
-	_, err = exec.Command("curl", "-XPUT", "-H", "content-type:application/json", "http://127.0.0.1:8093/riak/b3", "-d", `{"props":{"precommit":[{"mod":"riak_search_kv_hook","fun":"precommit"}]}}`).Output()
-	if err != nil {
+	if _, err := exec.Command("curl", "-XPUT", "-H", "content-type:application/json", "http://127.0.0.1:8093/riak/b3", "-d", `{"props":{"precommit":[{"mod":"riak_search_kv_hook","fun":"precommit"}]}}`).Output(); err != nil {
 		t.Error(err.Error())
 	}
 

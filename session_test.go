@@ -7,15 +7,9 @@ import (
 func TestMultipleSession(t *testing.T) {
 	client := dial()
 	defer client.Close()
-	s1, err := client.Session()
-	if err != nil {
-		t.Error(err.Error())
-	}
+	s1 := client.Session()
 	defer s1.Close()
-	s2, err := client.Session()
-	if err != nil {
-		t.Error(err.Error())
-	}
+	s2 := client.Session()
 	defer s2.Close()
 
 	s1name := "session-1"

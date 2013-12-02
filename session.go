@@ -1,20 +1,148 @@
 package riaken_core
 
 import (
+	"bytes"
+	"encoding/binary"
+	"errors"
+	"fmt"
+	"io"
+	"log"
+	"net"
+	"syscall"
+)
+
+import (
 	"code.google.com/p/goprotobuf/proto"
 	"github.com/riaken/riaken-core/rpb"
 )
 
+var ErrCannotRead error = errors.New("cannot read from a non-active or closed connection")
+var ErrCannotWrite error = errors.New("cannot write to a non-active or closed connection")
+
 type Session struct {
-	Client *Client // reference back to client
-	Node   *Node   // the Node this session has access to for it's duration
+	Client *Client      // reference back to client
+	addr   string       // address this node is associated with
+	conn   *net.TCPConn // connection
+	active bool         // whether connection is active or not
+	state  bool         // true - available, false - shutdown
+	debug  bool         // debugging info
 }
 
-func NewSession(client *Client, Node *Node) *Session {
+func NewSession(client *Client, addr string) *Session {
 	return &Session{
 		Client: client,
-		Node:   Node,
+		addr:   addr,
+		state:  true,
 	}
+}
+
+// Dial attempts to connect to the Riak node.
+func (s *Session) Dial() error {
+	var err error
+	addr, err := net.ResolveTCPAddr("tcp", s.addr)
+	if err != nil {
+		return err
+	}
+	s.conn, err = net.DialTCP("tcp", nil, addr)
+	if err != nil {
+		if s.debug {
+			log.Print(err.Error())
+		}
+		s.active = false
+	} else {
+		if s.debug {
+			log.Printf("connected to: %s", s.addr)
+		}
+		s.conn.SetKeepAlive(true)
+		s.active = true
+	}
+	return err
+}
+
+// check verifies the session is still connected and the Riak node can be accessed.
+func (s *Session) check() {
+	if s.debug {
+		log.Printf("state for %s - active: %t", s.addr, s.active)
+	}
+	if !s.active {
+		if s.debug {
+			log.Printf("redialing: %s", s.addr)
+		}
+		if s.conn != nil {
+			s.conn.Close()
+		}
+		if err := s.Dial(); err != nil {
+			log.Print(err.Error())
+		}
+	}
+	s.active = s.Ping()
+}
+
+func (s *Session) Available() bool {
+	return (s.conn != nil && s.active && s.state)
+}
+
+func (s *Session) Release() {
+	s.Client.release(s)
+}
+
+// Close the underlying net connection and set this session to inactive.
+func (s *Session) Close() {
+	s.active = false
+	s.state = false
+	if s.conn != nil {
+		s.conn.Close()
+	}
+}
+
+// read response from the network connection.
+func (s *Session) read() ([]byte, error) {
+	if !s.Available() {
+		return nil, ErrCannotRead
+	}
+	buf := make([]byte, 4)
+	var size int32
+	// first 4 bytes are always size of message
+	if count, err := io.ReadFull(s.conn, buf); err == nil && count == 4 {
+		sbuf := bytes.NewBuffer(buf)
+		binary.Read(sbuf, binary.BigEndian, &size)
+		data := make([]byte, size)
+		// read rest of message and return it if no errors
+		count, err := io.ReadFull(s.conn, data)
+		if err != nil {
+			if err == syscall.EPIPE {
+				s.conn.Close()
+			}
+			s.active = false
+			return nil, err
+		}
+		if count != int(size) {
+			s.active = false
+			return nil, errors.New(fmt.Sprintf("data length: %d, only read: %d", len(data), count))
+		}
+		return data, nil
+	}
+	return nil, nil
+}
+
+// write data to network connection.
+func (s *Session) write(data []byte) error {
+	if !s.Available() {
+		return ErrCannotWrite
+	}
+	count, err := s.conn.Write(data)
+	if err != nil {
+		if err == syscall.EPIPE {
+			s.conn.Close()
+		}
+		s.active = false
+		return err
+	}
+	if count != len(data) {
+		s.active = false
+		return errors.New(fmt.Sprintf("data length: %d, only wrote: %d", len(data), count))
+	}
+	return nil
 }
 
 // execute does the full request/response cycle on a command using a single Node connection instance.
@@ -24,31 +152,41 @@ func (s *Session) execute(code int, in []byte) (interface{}, error) {
 		return nil, err
 	}
 
-	if err := s.Node.write(req); err != nil {
+	if err := s.write(req); err != nil {
 		return nil, err
 	}
 
-	resp, err := s.Node.read()
+	resp, err := s.read()
 	if err != nil {
 		return nil, err
 	}
 
 	data, err := rpbRead(resp)
 	if err != nil {
+		// For some reason the connection isn't responding, set to inactive.
+		// This could be an insufficient number of vnodes error, etc.
+		if err == ErrZeroLength {
+			s.active = false
+		}
 		return nil, err
 	}
 	return data, nil
 }
 
-// executeRead continues to read streaming value from the connection.
+// executeRead continues to read streaming value from the same connection.
 func (s *Session) executeRead() (interface{}, error) {
-	resp, err := s.Node.read()
+	resp, err := s.read()
 	if err != nil {
 		return nil, err
 	}
 
 	data, err := rpbRead(resp)
 	if err != nil {
+		// For some reason the connection isn't responding, set to inactive.
+		// This could be an insufficient number of vnodes error, etc.
+		if err == ErrZeroLength {
+			s.active = false
+		}
 		return nil, err
 	}
 	return data, nil
@@ -69,11 +207,6 @@ func (s *Session) Query() *Query {
 	}
 }
 
-// Close releases the Node back to the client pool.
-func (s *Session) Close() {
-	s.Client.Release(s.Node)
-}
-
 // ListBuckets returns a list of buckets from Riak.
 //
 // Riak Docs - Caution: This call can be expensive for the server - do not use in performance sensitive code.
@@ -91,12 +224,14 @@ func (s *Session) ListBuckets() ([]*Bucket, error) {
 }
 
 // Ping is a server method which returns a Riak ping response.
-func (s *Session) Ping() (bool, error) {
-	out, err := s.execute(1, nil) // RpbPingReq
+//
+// This method directly influences the state of the node attached to this session.
+func (s *Session) Ping() bool {
+	check, err := s.execute(1, nil) // RpbPingReq
 	if err != nil {
-		return false, err
+		return false
 	}
-	return out.(bool), nil
+	return check.(bool)
 }
 
 // GetClientId gets the id set for this client.

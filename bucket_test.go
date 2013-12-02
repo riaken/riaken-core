@@ -11,11 +11,8 @@ import (
 func TestListKeys(t *testing.T) {
 	client := dial()
 	defer client.Close()
-	session, err := client.Session()
-	if err != nil {
-		t.Error(err.Error())
-	}
-	defer session.Close()
+	session := client.Session()
+	defer session.Release()
 
 	bucket := session.GetBucket("b2")
 	object := bucket.Object("o2")
@@ -46,11 +43,8 @@ func TestListKeys(t *testing.T) {
 func TestSetGetBucketProps(t *testing.T) {
 	client := dial()
 	defer client.Close()
-	session, err := client.Session()
-	if err != nil {
-		t.Error(err.Error())
-	}
-	defer session.Close()
+	session := client.Session()
+	defer session.Release()
 
 	bucket := session.GetBucket("b2")
 	tb := true

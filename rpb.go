@@ -12,10 +12,12 @@ import (
 	"github.com/riaken/riaken-core/rpb"
 )
 
+var ErrZeroLength error = errors.New("response was only 0 bytes long")
+
 // RpbRead reads the Riak response into the correct rpb structure.
 func rpbRead(data []byte) (interface{}, error) {
 	if len(data) == 0 {
-		return nil, errors.New("response was only 0 bytes long")
+		return nil, ErrZeroLength
 	}
 
 	code := data[0] // rpb code
