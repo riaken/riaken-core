@@ -123,6 +123,9 @@ func (q *Query) SecondaryIndexes(bucket, index, key, start, end []byte, maxResul
 			return nil, err
 		}
 	}
+	if out.(*rpb.RpbIndexResp).GetDone() {
+		q.streamState = 0
+	}
 	return out.(*rpb.RpbIndexResp), nil
 }
 
