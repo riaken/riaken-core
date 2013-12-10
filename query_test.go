@@ -186,3 +186,40 @@ func TestQuerySearch(t *testing.T) {
 		t.Error(err.Error())
 	}
 }
+
+func TestQuerySearchCompound(t *testing.T) {
+	client := dial()
+	defer client.Close()
+	session := client.Session()
+	defer session.Release()
+
+	// Set bucket properties.
+	// Unfortunately these still aren't exposed via PBC, so do it manually with curl.
+	if _, err := exec.Command("curl", "-XPUT", "-H", "content-type:application/json", "http://127.0.0.1:8093/riak/b3", "-d", `{"props":{"precommit":[{"mod":"riak_search_kv_hook","fun":"precommit"}]}}`).Output(); err != nil {
+		t.Error(err.Error())
+	}
+
+	// Setup
+	bucket := session.GetBucket("b3")
+	object := bucket.Object("o2")
+	object.ContentType([]byte("application/json"))
+	if _, err := object.Store([]byte(`{"food": "pizza", "drink": "beer wine whiskey"}`)); err != nil {
+		t.Error(err.Error())
+	}
+
+	// Query
+	query := session.Query()
+	data, err := query.Search([]byte("b3"), []byte("food:pizza AND drink:beer"))
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	if data.GetNumFound() == 0 {
+		t.Error("expected results")
+	}
+
+	// Cleanup
+	if _, err := object.Delete(); err != nil {
+		t.Error(err.Error())
+	}
+}
