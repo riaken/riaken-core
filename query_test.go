@@ -12,7 +12,7 @@ import (
 
 // Example from http://docs.basho.com/riak/latest/dev/using/mapreduce/
 
-func TestMapReduce(t *testing.T) {
+func TestQueryMapReduce(t *testing.T) {
 	client := dial()
 	defer client.Close()
 	session := client.Session()
@@ -106,7 +106,7 @@ func TestMapReduce(t *testing.T) {
 	}
 }
 
-func TestSecondaryIndexes(t *testing.T) {
+func TestQuerySecondaryIndexes(t *testing.T) {
 	client := dial()
 	defer client.Close()
 	session := client.Session()
@@ -150,7 +150,7 @@ func TestSecondaryIndexes(t *testing.T) {
 	}
 }
 
-func TestSearch(t *testing.T) {
+func TestQuerySearch(t *testing.T) {
 	client := dial()
 	defer client.Close()
 	session := client.Session()

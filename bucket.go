@@ -88,6 +88,8 @@ func (b *Bucket) SetBucketProps(props *rpb.RpbBucketProps) (bool, error) {
 }
 
 // Object returns a new object associated with this bucket using key.
+//
+// Setting an empty key string will result in a server generated key.
 func (b *Bucket) Object(key string) *Object {
 	return &Object{
 		bucket: b,

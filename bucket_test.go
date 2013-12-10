@@ -8,7 +8,7 @@ import (
 	"github.com/riaken/riaken-core/rpb"
 )
 
-func TestListKeys(t *testing.T) {
+func TestBucketListKeys(t *testing.T) {
 	client := dial()
 	defer client.Close()
 	session := client.Session()
@@ -40,7 +40,7 @@ func TestListKeys(t *testing.T) {
 	}
 }
 
-func TestSetGetBucketProps(t *testing.T) {
+func TestBucketSetGetProps(t *testing.T) {
 	client := dial()
 	defer client.Close()
 	session := client.Session()

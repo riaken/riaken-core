@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestMultipleSession(t *testing.T) {
+func TestSessionMultiple(t *testing.T) {
 	client := dial()
 	defer client.Close()
 	s1 := client.Session()

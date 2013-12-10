@@ -35,7 +35,7 @@ func TestObject(t *testing.T) {
 	}
 }
 
-func TestDoObject(t *testing.T) {
+func TestObjectDo(t *testing.T) {
 	client := dial()
 	defer client.Close()
 	session := client.Session()
@@ -74,6 +74,80 @@ func TestDoObject(t *testing.T) {
 		Rw: &rw,
 	}
 	if ok, err := object.Do(opts3).Delete(); !ok {
+		t.Error("deletion of object failed")
+	} else if err != nil {
+		t.Error(err.Error())
+	}
+}
+
+func TestObjectMultiple(t *testing.T) {
+	client := dial()
+	defer client.Close()
+	session := client.Session()
+	defer session.Release()
+
+	bucket := session.GetBucket("b1-multi")
+	o1 := bucket.Object("o1m")
+	o2 := bucket.Object("o2m")
+	o3 := bucket.Object("o3m")
+
+	if _, err := o1.Store([]byte("o1m-data")); err != nil {
+		t.Error(err.Error())
+	}
+	if _, err := o2.Store([]byte("o1m-data")); err != nil {
+		t.Error(err.Error())
+	}
+	if _, err := o3.Store([]byte("o1m-data")); err != nil {
+		t.Error(err.Error())
+	}
+
+	var keys [][]byte
+	for out, err := bucket.ListKeys(); !out.GetDone(); out, err = bucket.ListKeys() {
+		if err != nil {
+			t.Error(err.Error())
+		}
+		keys = append(keys, out.GetKeys()...)
+	}
+
+	if len(keys) != 3 {
+		t.Errorf("expected: %s, got: %d", len(keys))
+	}
+
+	if _, err := o1.Delete(); err != nil {
+		t.Error(err.Error())
+	}
+	if _, err := o2.Delete(); err != nil {
+		t.Error(err.Error())
+	}
+	if _, err := o3.Delete(); err != nil {
+		t.Error(err.Error())
+	}
+}
+
+func TestObjectNoKey(t *testing.T) {
+	client := dial()
+	defer client.Close()
+	session := client.Session()
+	defer session.Release()
+
+	bucket := session.GetBucket("b1")
+	object := bucket.Object("")
+	res, err := object.Store([]byte("o1-nokey"))
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	check := bucket.Object(string(res.GetKey()))
+	data, err := check.Fetch()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if len(data.GetContent()) > 0 {
+		if string(data.GetContent()[0].GetValue()) != "o1-nokey" {
+			t.Errorf("got %s, expected o1-nokey", string(data.GetContent()[0].GetValue()))
+		}
+	}
+	if ok, err := check.Delete(); !ok {
 		t.Error("deletion of object failed")
 	} else if err != nil {
 		t.Error(err.Error())

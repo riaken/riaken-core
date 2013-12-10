@@ -74,7 +74,9 @@ func (o *Object) Store(data []byte) (*rpb.RpbPutResp, error) {
 		}
 	}
 	opts.Bucket = []byte(o.bucket.name)
-	opts.Key = []byte(o.key)
+	if o.key != "" {
+		opts.Key = []byte(o.key)
+	}
 	if opts.Content == nil {
 		opts.Content = &rpb.RpbContent{
 			Value:       data,
