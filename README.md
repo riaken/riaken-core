@@ -30,7 +30,7 @@ The following points are what drive this project.
 
 * Simple. The code base is built to remain as straightforward as possible.  Rather than complex mutex locks, sessions are simply passed around over a channel.  This allows sessions to remain stateful, and not conflict with things such as background connectivity checks.
 * Extendable.  riaken-core is the least common demoninator.  It is meant to be extended by projects like riaken-struct which add new behavior, such as the ability to convert high level struct data to/from JSON.
-* Speed.  The current driver clocks at roughly 1800 ops/sec on a single 3.4 GHz Intel Core i7 iMac with 16gb of memory running 5 default Riak instances.  This should clearly scale higher against a real server cluster.
+* Speed.  The current driver clocks at roughly 1800 ops/sec on a single 3.4 GHz Intel Core i7 iMac with 16gb of memory running 5 default Riak instances.  This should scale much higher against a real server cluster.
 
 ## Usage
 
@@ -113,7 +113,7 @@ Get useful info about the Riak servers.
 Not exactly straightforward because they require the use of the RPB structs.
 
 	// Make sure to require this
-	import "github.com/riaken/riaken-core"
+	import "github.com/riaken/riaken-core/rpb"
 
 	// Code
 	bucket := session.GetBucket("b2")
@@ -258,7 +258,7 @@ Note that riak_search needs to be enabled in the app.config to use this.
 Sometimes it is desirable to pass more complex options to the server.  All methods capable of receiving additional options have access to `Do()`.  This method takes in a RPB struct and is chained together with the method one wishes to call.
 
 	// Make sure to require this
-	import "github.com/riaken/riaken-core"
+	import "github.com/riaken/riaken-core/rpb"
 
 	// Code
 	bucket := session.GetBucket("b1")
@@ -303,7 +303,7 @@ Sometimes it is desirable to pass more complex options to the server.  All metho
 		log.Error(err.Error())
 	}
 
-See the Riak docs for a more detailed explanation of what all the parameters are for each method.
+See the [Riak PBC docs](http://docs.basho.com/riak/latest/dev/references/protocol-buffers/) for a more detailed explanation of what all the parameters are for each method.
 
 ## Author
 
