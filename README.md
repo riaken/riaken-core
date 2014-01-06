@@ -39,13 +39,14 @@ The client is the all encompassing framework of riaken.  From there sessions sho
 
 	package main
 
+	import "log"
 	import "github.com/riaken/riaken-core"
 
 	func main() {
 		// Riak cluster addresses
 		addrs := []string{"127.0.0.1:8083", "127.0.0.1:8084", "127.0.0.1:8085", "127.0.0.1:8086", "127.0.0.1:8087"}
 		// Create a client, passing the addresses, and number of connections to maintain per cluster node
-		client := NewClient(addrs, 1)
+		client := riaken_core.NewClient(addrs, 1)
 		// Dial the servers
 		if err := client.Dial(); err != nil {
 			log.Fatal(err.Error()) // all nodes are down

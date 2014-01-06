@@ -55,7 +55,7 @@ func Example() {
 func dial() *Client {
 	//addrs := []string{"127.0.0.1:8087"}
 	addrs := []string{"127.0.0.1:8083", "127.0.0.1:8084", "127.0.0.1:8085", "127.0.0.1:8086", "127.0.0.1:8087"}
-	client := NewClient(addrs, 1)
+	client := NewClient(addrs, 5)
 	//client.Debug(true)
 	if err := client.Dial(); err != nil {
 		log.Fatal(err.Error()) // all nodes are down
