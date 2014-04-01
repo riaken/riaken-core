@@ -11,14 +11,16 @@ const PING_RATE time.Duration = time.Second * 5
 var ErrAllNodesDown error = errors.New("all nodes appear to be down")
 
 type Client struct {
-	cluster chan *Session
-	debug   bool // toggle debug output
+	cluster  chan *Session
+	debug    bool      // toggle debug output
+	shutdown chan bool // shutdown channel
 }
 
 // NewClient takes a list of Riak node addresses to connect to and the max number of connections to maintain per node.
 func NewClient(addrs []string, max int) *Client {
 	client := &Client{
-		cluster: make(chan *Session, len(addrs)*max),
+		cluster:  make(chan *Session, len(addrs)*max),
+		shutdown: make(chan bool),
 	}
 	for _, addr := range addrs {
 		for i := 0; i < max; i++ {
@@ -38,7 +40,7 @@ func (c *Client) Debug(debug bool) {
 func (c *Client) Dial() error {
 	down := 0
 	for i := 0; i < len(c.cluster); i++ {
-		s := <-c.cluster
+		s := c.fetch()
 		s.debug = c.debug
 		if err := s.Dial(); err != nil {
 			down++
@@ -46,7 +48,7 @@ func (c *Client) Dial() error {
 				log.Print(err.Error())
 			}
 		}
-		c.cluster <- s
+		c.release(s)
 	}
 	if down == len(c.cluster) {
 		return ErrAllNodesDown
@@ -62,38 +64,43 @@ func (c *Client) check() {
 		case <-time.After(PING_RATE):
 			for i := 0; i < len(c.cluster); i++ {
 				go func() {
-					s := <-c.cluster
+					s := c.fetch()
 					if !s.Available() {
 						s.check()
 					}
-					c.cluster <- s
+					c.release(s)
 				}()
 			}
+		case <-c.shutdown:
+			return
 		}
 	}
 }
 
 // Close gracefully shuts down all the node connections.
 func (c *Client) Close() {
+	c.shutdown <- true
 	for i := 0; i < len(c.cluster); i++ {
-		go func() {
-			s := <-c.cluster
-			s.Close()
-			c.cluster <- s
-		}()
+		s := c.fetch()
+		s.Close()
+		c.release(s)
 	}
 }
 
 // Session returns a new session.
 func (c *Client) Session() *Session {
 	for {
-		s := <-c.cluster
+		s := c.fetch()
 		if s.Available() {
 			return s
 		}
-		c.cluster <- s
+		c.release(s)
 	}
 	return nil
+}
+
+func (c *Client) fetch() *Session {
+	return <-c.cluster
 }
 
 func (c *Client) release(s *Session) {
