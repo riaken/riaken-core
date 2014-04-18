@@ -12,6 +12,7 @@ import (
 type Object struct {
 	bucket *Bucket // bucket this object is associated with
 	key    string  // key this object is associated with
+	vclock []byte  // vector clock
 	opts   interface{}
 	ct     []byte
 }
@@ -57,6 +58,7 @@ func (o *Object) Fetch() (*rpb.RpbGetResp, error) {
 	if err != nil {
 		return nil, err
 	}
+	o.vclock = out.(*rpb.RpbGetResp).Vclock
 	return out.(*rpb.RpbGetResp), nil
 }
 
@@ -85,6 +87,9 @@ func (o *Object) Store(data []byte) (*rpb.RpbPutResp, error) {
 	} else {
 		opts.Content.Value = data
 	}
+	if opts.Vclock == nil {
+		opts.Vclock = o.vclock
+	}
 	in, err := proto.Marshal(opts)
 	if err != nil {
 		return nil, err
@@ -109,6 +114,9 @@ func (o *Object) Delete() (bool, error) {
 	}
 	opts.Bucket = []byte(o.bucket.name)
 	opts.Key = []byte(o.key)
+	if opts.Vclock == nil {
+		opts.Vclock = o.vclock
+	}
 	in, err := proto.Marshal(opts)
 	if err != nil {
 		return false, err
