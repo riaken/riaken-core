@@ -96,3 +96,11 @@ func (b *Bucket) Object(key string) *Object {
 		key:    key,
 	}
 }
+
+// Counter returns a new counter associated with this bucket using key.
+func (b *Bucket) Counter(key string) *Counter {
+	return &Counter{
+		bucket: b,
+		key:    key,
+	}
+}

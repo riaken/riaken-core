@@ -5,6 +5,7 @@ import (
 )
 
 import (
+	"code.google.com/p/goprotobuf/proto"
 	"github.com/riaken/riaken-core/rpb"
 )
 
@@ -43,9 +44,8 @@ func TestObjectDo(t *testing.T) {
 
 	bucket := session.GetBucket("b1")
 	object := bucket.Object("o1")
-	tb1 := true
 	opts1 := &rpb.RpbPutReq{
-		ReturnBody: &tb1,
+		ReturnBody: proto.Bool(true),
 	}
 	ret, err := object.Do(opts1).Store([]byte("o1-data"))
 	if err != nil {
@@ -55,9 +55,8 @@ func TestObjectDo(t *testing.T) {
 		t.Errorf("got %s, expected o1-data", string(ret.GetContent()[0].GetValue()))
 	}
 
-	tb2 := true
 	opts2 := &rpb.RpbGetReq{
-		Head: &tb2,
+		Head: proto.Bool(true),
 	}
 	data, err := object.Do(opts2).Fetch()
 	if err != nil {
@@ -69,9 +68,8 @@ func TestObjectDo(t *testing.T) {
 		}
 	}
 
-	rw := uint32(1)
 	opts3 := &rpb.RpbDelReq{
-		Rw: &rw,
+		Rw: proto.Uint32(1),
 	}
 	if ok, err := object.Do(opts3).Delete(); !ok {
 		t.Error("deletion of object failed")

@@ -108,7 +108,22 @@ func rpbRead(data []byte) (interface{}, error) {
 			return nil, err
 		}
 		return out, nil
+	case 51: // RpbCounterUpdateResp
+		out := &rpb.RpbCounterUpdateResp{}
+		err := proto.Unmarshal(data, out)
+		if err != nil {
+			return nil, err
+		}
+		return out, nil
+	case 53: // RpbCounterGetResp
+		out := &rpb.RpbCounterGetResp{}
+		err := proto.Unmarshal(data, out)
+		if err != nil {
+			return nil, err
+		}
+		return out, nil
 	}
+
 	return nil, errors.New("invalid Rpb code specified")
 }
 

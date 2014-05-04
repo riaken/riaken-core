@@ -10,6 +10,14 @@ import (
 	"github.com/riaken/riaken-core/rpb"
 )
 
+func init() {
+	// Set bucket properties.
+	// Unfortunately these still aren't exposed via PBC, so do it manually with curl.
+	if _, err := exec.Command("curl", "-XPUT", "-H", "content-type:application/json", "http://127.0.0.1:8093/riak/b3", "-d", `{"props":{"precommit":[{"mod":"riak_search_kv_hook","fun":"precommit"}]}}`).Output(); err != nil {
+		panic(err)
+	}
+}
+
 // Example from http://docs.basho.com/riak/latest/dev/using/mapreduce/
 
 func TestQueryMapReduce(t *testing.T) {
@@ -156,12 +164,6 @@ func TestQuerySearch(t *testing.T) {
 	session := client.Session()
 	defer session.Release()
 
-	// Set bucket properties.
-	// Unfortunately these still aren't exposed via PBC, so do it manually with curl.
-	if _, err := exec.Command("curl", "-XPUT", "-H", "content-type:application/json", "http://127.0.0.1:8093/riak/b3", "-d", `{"props":{"precommit":[{"mod":"riak_search_kv_hook","fun":"precommit"}]}}`).Output(); err != nil {
-		t.Error(err.Error())
-	}
-
 	// Setup
 	bucket := session.GetBucket("b3")
 	object := bucket.Object("o1")
@@ -192,12 +194,6 @@ func TestQuerySearchCompound(t *testing.T) {
 	defer client.Close()
 	session := client.Session()
 	defer session.Release()
-
-	// Set bucket properties.
-	// Unfortunately these still aren't exposed via PBC, so do it manually with curl.
-	if _, err := exec.Command("curl", "-XPUT", "-H", "content-type:application/json", "http://127.0.0.1:8093/riak/b3", "-d", `{"props":{"precommit":[{"mod":"riak_search_kv_hook","fun":"precommit"}]}}`).Output(); err != nil {
-		t.Error(err.Error())
-	}
 
 	// Setup
 	bucket := session.GetBucket("b3")

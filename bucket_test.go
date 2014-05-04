@@ -5,6 +5,7 @@ import (
 )
 
 import (
+	"code.google.com/p/goprotobuf/proto"
 	"github.com/riaken/riaken-core/rpb"
 )
 
@@ -47,11 +48,9 @@ func TestBucketSetGetProps(t *testing.T) {
 	defer session.Release()
 
 	bucket := session.GetBucket("b2")
-	tb := true
-	ti := uint32(1)
 	props := &rpb.RpbBucketProps{
-		NVal:      &ti,
-		AllowMult: &tb,
+		NVal:      proto.Uint32(1),
+		AllowMult: proto.Bool(true),
 	}
 	if ok, err := bucket.SetBucketProps(props); !ok {
 		t.Error("could not set bucket props")

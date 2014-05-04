@@ -113,15 +113,16 @@ Get useful info about the Riak servers.
 Not exactly straightforward because they require the use of the RPB structs.
 
 	// Make sure to require this
-	import "github.com/riaken/riaken-core/rpb"
+	import (
+		"github.com/riaken/riaken-core/rpb"
+		"code.google.com/p/goprotobuf/proto"
+	)
 
 	// Code
 	bucket := session.GetBucket("b2")
-	tb := true
-	ti := uint32(1)
 	props := &rpb.RpbBucketProps{
-		NVal:      &ti,
-		AllowMult: &tb,
+		NVal:      proto.Uint32(1),
+		AllowMult: proto.Bool(true),
 	}
 	if ok, err := bucket.SetBucketProps(props); !ok {
 		log.Error("could not set bucket props")
@@ -258,16 +259,18 @@ Note that riak_search needs to be enabled in the app.config to use this.
 Sometimes it is desirable to pass more complex options to the server.  All methods capable of receiving additional options have access to `Do()`.  This method takes in a RPB struct and is chained together with the method one wishes to call.
 
 	// Make sure to require this
-	import "github.com/riaken/riaken-core/rpb"
+	import (
+		"github.com/riaken/riaken-core/rpb"
+		"code.google.com/p/goprotobuf/proto"
+	)
 
 	// Code
 	bucket := session.GetBucket("b1")
 	object := bucket.Object("o1")
 
 	// Store
-	tb1 := true
 	opts1 := &rpb.RpbPutReq{
-		ReturnBody: &tb1,
+		ReturnBody: proto.Bool(true),
 	}
 	ret, err := object.Do(opts1).Store([]byte("o1-data"))
 	if err != nil {
@@ -278,9 +281,8 @@ Sometimes it is desirable to pass more complex options to the server.  All metho
 	}
 
 	// Fetch
-	tb2 := true
 	opts2 := &rpb.RpbGetReq{
-		Head: &tb2,
+		Head: proto.Bool(true),
 	}
 	data, err := object.Do(opts2).Fetch()
 	if err != nil {
@@ -293,15 +295,32 @@ Sometimes it is desirable to pass more complex options to the server.  All metho
 	}
 
 	// Delete
-	rw := uint32(1)
 	opts3 := &rpb.RpbDelReq{
-		Rw: &rw,
+		Rw: proto.Uint32(1),
 	}
 	if ok, err := object.Do(opts3).Delete(); !ok {
 		log.Error("deletion of object failed")
 	} else if err != nil {
 		log.Error(err.Error())
 	}
+
+## Counters
+
+### Update
+
+	bucket := session.GetBucket("b5")
+	counter := bucket.Counter("c1")
+	if _, err := counter.Update(1); err != nil {
+		log.Error(err.Error())
+	}
+
+### Get
+
+	data, err := counter.Get()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	log.Print(data.GetValue())
 
 See the [Riak PBC docs](http://docs.basho.com/riak/latest/dev/references/protocol-buffers/) for a more detailed explanation of what all the parameters are for each method.
 
