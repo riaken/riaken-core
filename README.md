@@ -205,6 +205,24 @@ Simple version.
 		log.Error(err.Error())
 	}
 
+### Counter Operations
+
+#### Update
+
+	bucket := session.GetBucket("b5")
+	counter := bucket.Counter("c1")
+	if _, err := counter.Update(1); err != nil {
+		log.Error(err.Error())
+	}
+
+#### Get
+
+	data, err := counter.Get()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	log.Print(data.GetValue())
+
 ### Query Operations
 
 #### Map Reduce
@@ -303,24 +321,6 @@ Sometimes it is desirable to pass more complex options to the server.  All metho
 	} else if err != nil {
 		log.Error(err.Error())
 	}
-
-## Counters
-
-### Update
-
-	bucket := session.GetBucket("b5")
-	counter := bucket.Counter("c1")
-	if _, err := counter.Update(1); err != nil {
-		log.Error(err.Error())
-	}
-
-### Get
-
-	data, err := counter.Get()
-	if err != nil {
-		t.Error(err.Error())
-	}
-	log.Print(data.GetValue())
 
 See the [Riak PBC docs](http://docs.basho.com/riak/latest/dev/references/protocol-buffers/) for a more detailed explanation of what all the parameters are for each method.
 
