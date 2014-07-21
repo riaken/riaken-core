@@ -4,11 +4,11 @@ Go Protocol Buffer driver for the Riak distributed database
 
 ## Install
 
-    go get github.com/riaken/riaken-core
+    go get http://gopkg.in/riaken/riaken-core.v1
 
 ## Documentation
 
-http://godoc.org/github.com/riaken/riaken-core
+http://godoc.org/gopkg.in/riaken/riaken-core.v1
 
 ## Extended Riaken
 
