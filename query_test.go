@@ -6,25 +6,8 @@ import (
 )
 
 import (
-	"code.google.com/p/goprotobuf/proto"
 	"github.com/riaken/riaken-core/rpb"
 )
-
-func init() {
-	// Set bucket properties.
-	client := dial()
-	defer client.Close()
-	session := client.Session()
-	defer session.Release()
-
-	opts := &rpb.RpbBucketProps{
-		AllowMult: proto.Bool(true),
-	}
-	bucket := session.GetBucket("b3")
-	if _, err := bucket.SetBucketProps(opts); err != nil {
-		panic(err)
-	}
-}
 
 // Example from http://docs.basho.com/riak/latest/dev/using/mapreduce/
 
