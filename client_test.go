@@ -9,7 +9,7 @@ var client *Client
 
 func Example() {
 	// Riak cluster addresses
-	addrs := []string{"127.0.0.1:8083", "127.0.0.1:8084", "127.0.0.1:8085", "127.0.0.1:8086", "127.0.0.1:8087"}
+	addrs := []string{"127.0.0.1:10017", "127.0.0.1:10027", "127.0.0.1:10037", "127.0.0.1:10047", "127.0.0.1:10057"}
 	// Create a client, passing the addresses, number of connections to maintain per cluster node
 	client := NewClient(addrs, 1)
 	// Dial the servers
@@ -53,8 +53,7 @@ func Example() {
 }
 
 func dial() *Client {
-	//addrs := []string{"127.0.0.1:8087"}
-	addrs := []string{"127.0.0.1:8083", "127.0.0.1:8084", "127.0.0.1:8085", "127.0.0.1:8086", "127.0.0.1:8087"}
+	addrs := []string{"127.0.0.1:10017", "127.0.0.1:10027", "127.0.0.1:10037", "127.0.0.1:10047", "127.0.0.1:10057"}
 	client := NewClient(addrs, 5)
 	//client.Debug(true)
 	if err := client.Dial(); err != nil {

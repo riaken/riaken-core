@@ -76,7 +76,7 @@ func (q *Query) MapReduce(req, ct []byte) (*rpb.RpbMapRedResp, error) {
 // Optional: This can use a streaming interface and should be called repeatedly until done is true.
 // Set stream to true when calling Do(RpbIndexReq).SecondaryIndexes().
 //
-// Note: storage_backend must be set to riak_kv_eleveldb_backend in app.config.
+// Note: storage_backend must be set to leveldb in riak.conf.
 func (q *Query) SecondaryIndexes(bucket, index, key, start, end []byte, maxResults uint32, continuation []byte) (*rpb.RpbIndexResp, error) {
 	defer q.reset()
 	opts := &rpb.RpbIndexReq{}

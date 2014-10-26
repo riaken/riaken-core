@@ -94,6 +94,7 @@ type RpbGetReq struct {
 	Timeout          *uint32 `protobuf:"varint,10,opt,name=timeout" json:"timeout,omitempty"`
 	SloppyQuorum     *bool   `protobuf:"varint,11,opt,name=sloppy_quorum" json:"sloppy_quorum,omitempty"`
 	NVal             *uint32 `protobuf:"varint,12,opt,name=n_val" json:"n_val,omitempty"`
+	Type             []byte  `protobuf:"bytes,13,opt,name=type" json:"type,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
@@ -185,6 +186,13 @@ func (m *RpbGetReq) GetNVal() uint32 {
 	return 0
 }
 
+func (m *RpbGetReq) GetType() []byte {
+	if m != nil {
+		return m.Type
+	}
+	return nil
+}
+
 type RpbGetResp struct {
 	Content          []*RpbContent `protobuf:"bytes,1,rep,name=content" json:"content,omitempty"`
 	Vclock           []byte        `protobuf:"bytes,2,opt,name=vclock" json:"vclock,omitempty"`
@@ -233,6 +241,7 @@ type RpbPutReq struct {
 	Asis             *bool       `protobuf:"varint,13,opt,name=asis" json:"asis,omitempty"`
 	SloppyQuorum     *bool       `protobuf:"varint,14,opt,name=sloppy_quorum" json:"sloppy_quorum,omitempty"`
 	NVal             *uint32     `protobuf:"varint,15,opt,name=n_val" json:"n_val,omitempty"`
+	Type             []byte      `protobuf:"bytes,16,opt,name=type" json:"type,omitempty"`
 	XXX_unrecognized []byte      `json:"-"`
 }
 
@@ -345,6 +354,13 @@ func (m *RpbPutReq) GetNVal() uint32 {
 	return 0
 }
 
+func (m *RpbPutReq) GetType() []byte {
+	if m != nil {
+		return m.Type
+	}
+	return nil
+}
+
 type RpbPutResp struct {
 	Content          []*RpbContent `protobuf:"bytes,1,rep,name=content" json:"content,omitempty"`
 	Vclock           []byte        `protobuf:"bytes,2,opt,name=vclock" json:"vclock,omitempty"`
@@ -390,6 +406,7 @@ type RpbDelReq struct {
 	Timeout          *uint32 `protobuf:"varint,10,opt,name=timeout" json:"timeout,omitempty"`
 	SloppyQuorum     *bool   `protobuf:"varint,11,opt,name=sloppy_quorum" json:"sloppy_quorum,omitempty"`
 	NVal             *uint32 `protobuf:"varint,12,opt,name=n_val" json:"n_val,omitempty"`
+	Type             []byte  `protobuf:"bytes,13,opt,name=type" json:"type,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
@@ -481,9 +498,17 @@ func (m *RpbDelReq) GetNVal() uint32 {
 	return 0
 }
 
+func (m *RpbDelReq) GetType() []byte {
+	if m != nil {
+		return m.Type
+	}
+	return nil
+}
+
 type RpbListBucketsReq struct {
 	Timeout          *uint32 `protobuf:"varint,1,opt,name=timeout" json:"timeout,omitempty"`
 	Stream           *bool   `protobuf:"varint,2,opt,name=stream" json:"stream,omitempty"`
+	Type             []byte  `protobuf:"bytes,3,opt,name=type" json:"type,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
@@ -503,6 +528,13 @@ func (m *RpbListBucketsReq) GetStream() bool {
 		return *m.Stream
 	}
 	return false
+}
+
+func (m *RpbListBucketsReq) GetType() []byte {
+	if m != nil {
+		return m.Type
+	}
+	return nil
 }
 
 type RpbListBucketsResp struct {
@@ -532,6 +564,7 @@ func (m *RpbListBucketsResp) GetDone() bool {
 type RpbListKeysReq struct {
 	Bucket           []byte  `protobuf:"bytes,1,req,name=bucket" json:"bucket,omitempty"`
 	Timeout          *uint32 `protobuf:"varint,2,opt,name=timeout" json:"timeout,omitempty"`
+	Type             []byte  `protobuf:"bytes,3,opt,name=type" json:"type,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
@@ -551,6 +584,13 @@ func (m *RpbListKeysReq) GetTimeout() uint32 {
 		return *m.Timeout
 	}
 	return 0
+}
+
+func (m *RpbListKeysReq) GetType() []byte {
+	if m != nil {
+		return m.Type
+	}
+	return nil
 }
 
 type RpbListKeysResp struct {
@@ -636,7 +676,7 @@ func (m *RpbMapRedResp) GetDone() bool {
 type RpbIndexReq struct {
 	Bucket           []byte                      `protobuf:"bytes,1,req,name=bucket" json:"bucket,omitempty"`
 	Index            []byte                      `protobuf:"bytes,2,req,name=index" json:"index,omitempty"`
-	Qtype            *RpbIndexReq_IndexQueryType `protobuf:"varint,3,req,name=qtype,enum=RpbIndexReq_IndexQueryType" json:"qtype,omitempty"`
+	Qtype            *RpbIndexReq_IndexQueryType `protobuf:"varint,3,req,name=qtype,enum=rpb.RpbIndexReq_IndexQueryType" json:"qtype,omitempty"`
 	Key              []byte                      `protobuf:"bytes,4,opt,name=key" json:"key,omitempty"`
 	RangeMin         []byte                      `protobuf:"bytes,5,opt,name=range_min" json:"range_min,omitempty"`
 	RangeMax         []byte                      `protobuf:"bytes,6,opt,name=range_max" json:"range_max,omitempty"`
@@ -645,6 +685,9 @@ type RpbIndexReq struct {
 	MaxResults       *uint32                     `protobuf:"varint,9,opt,name=max_results" json:"max_results,omitempty"`
 	Continuation     []byte                      `protobuf:"bytes,10,opt,name=continuation" json:"continuation,omitempty"`
 	Timeout          *uint32                     `protobuf:"varint,11,opt,name=timeout" json:"timeout,omitempty"`
+	Type             []byte                      `protobuf:"bytes,12,opt,name=type" json:"type,omitempty"`
+	TermRegex        []byte                      `protobuf:"bytes,13,opt,name=term_regex" json:"term_regex,omitempty"`
+	PaginationSort   *bool                       `protobuf:"varint,14,opt,name=pagination_sort" json:"pagination_sort,omitempty"`
 	XXX_unrecognized []byte                      `json:"-"`
 }
 
@@ -729,6 +772,27 @@ func (m *RpbIndexReq) GetTimeout() uint32 {
 	return 0
 }
 
+func (m *RpbIndexReq) GetType() []byte {
+	if m != nil {
+		return m.Type
+	}
+	return nil
+}
+
+func (m *RpbIndexReq) GetTermRegex() []byte {
+	if m != nil {
+		return m.TermRegex
+	}
+	return nil
+}
+
+func (m *RpbIndexReq) GetPaginationSort() bool {
+	if m != nil && m.PaginationSort != nil {
+		return *m.PaginationSort
+	}
+	return false
+}
+
 type RpbIndexResp struct {
 	Keys             [][]byte   `protobuf:"bytes,1,rep,name=keys" json:"keys,omitempty"`
 	Results          []*RpbPair `protobuf:"bytes,2,rep,name=results" json:"results,omitempty"`
@@ -778,6 +842,7 @@ type RpbCSBucketReq struct {
 	Continuation     []byte  `protobuf:"bytes,6,opt,name=continuation" json:"continuation,omitempty"`
 	MaxResults       *uint32 `protobuf:"varint,7,opt,name=max_results" json:"max_results,omitempty"`
 	Timeout          *uint32 `protobuf:"varint,8,opt,name=timeout" json:"timeout,omitempty"`
+	Type             []byte  `protobuf:"bytes,9,opt,name=type" json:"type,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
@@ -842,6 +907,13 @@ func (m *RpbCSBucketReq) GetTimeout() uint32 {
 		return *m.Timeout
 	}
 	return 0
+}
+
+func (m *RpbCSBucketReq) GetType() []byte {
+	if m != nil {
+		return m.Type
+	}
+	return nil
 }
 
 type RpbCSBucketResp struct {
@@ -1181,5 +1253,5 @@ func (m *RpbCounterGetResp) GetValue() int64 {
 }
 
 func init() {
-	proto.RegisterEnum("RpbIndexReq_IndexQueryType", RpbIndexReq_IndexQueryType_name, RpbIndexReq_IndexQueryType_value)
+	proto.RegisterEnum("rpb.RpbIndexReq_IndexQueryType", RpbIndexReq_IndexQueryType_name, RpbIndexReq_IndexQueryType_value)
 }

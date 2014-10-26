@@ -1,19 +1,27 @@
 package riaken_core
 
 import (
-	"os/exec"
 	"regexp"
 	"testing"
 )
 
 import (
+	"code.google.com/p/goprotobuf/proto"
 	"github.com/riaken/riaken-core/rpb"
 )
 
 func init() {
 	// Set bucket properties.
-	// Unfortunately these still aren't exposed via PBC, so do it manually with curl.
-	if _, err := exec.Command("curl", "-XPUT", "-H", "content-type:application/json", "http://127.0.0.1:8093/riak/b3", "-d", `{"props":{"precommit":[{"mod":"riak_search_kv_hook","fun":"precommit"}]}}`).Output(); err != nil {
+	client := dial()
+	defer client.Close()
+	session := client.Session()
+	defer session.Release()
+
+	opts := &rpb.RpbBucketProps{
+		AllowMult: proto.Bool(true),
+	}
+	bucket := session.GetBucket("b3")
+	if _, err := bucket.SetBucketProps(opts); err != nil {
 		panic(err)
 	}
 }

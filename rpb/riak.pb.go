@@ -129,6 +129,7 @@ func (m *RpbPair) GetValue() []byte {
 
 type RpbGetBucketReq struct {
 	Bucket           []byte `protobuf:"bytes,1,req,name=bucket" json:"bucket,omitempty"`
+	Type             []byte `protobuf:"bytes,2,opt,name=type" json:"type,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
 }
 
@@ -139,6 +140,13 @@ func (*RpbGetBucketReq) ProtoMessage()    {}
 func (m *RpbGetBucketReq) GetBucket() []byte {
 	if m != nil {
 		return m.Bucket
+	}
+	return nil
+}
+
+func (m *RpbGetBucketReq) GetType() []byte {
+	if m != nil {
+		return m.Type
 	}
 	return nil
 }
@@ -162,6 +170,7 @@ func (m *RpbGetBucketResp) GetProps() *RpbBucketProps {
 type RpbSetBucketReq struct {
 	Bucket           []byte          `protobuf:"bytes,1,req,name=bucket" json:"bucket,omitempty"`
 	Props            *RpbBucketProps `protobuf:"bytes,2,req,name=props" json:"props,omitempty"`
+	Type             []byte          `protobuf:"bytes,3,opt,name=type" json:"type,omitempty"`
 	XXX_unrecognized []byte          `json:"-"`
 }
 
@@ -183,8 +192,16 @@ func (m *RpbSetBucketReq) GetProps() *RpbBucketProps {
 	return nil
 }
 
+func (m *RpbSetBucketReq) GetType() []byte {
+	if m != nil {
+		return m.Type
+	}
+	return nil
+}
+
 type RpbResetBucketReq struct {
 	Bucket           []byte `protobuf:"bytes,1,req,name=bucket" json:"bucket,omitempty"`
+	Type             []byte `protobuf:"bytes,2,opt,name=type" json:"type,omitempty"`
 	XXX_unrecognized []byte `json:"-"`
 }
 
@@ -195,6 +212,53 @@ func (*RpbResetBucketReq) ProtoMessage()    {}
 func (m *RpbResetBucketReq) GetBucket() []byte {
 	if m != nil {
 		return m.Bucket
+	}
+	return nil
+}
+
+func (m *RpbResetBucketReq) GetType() []byte {
+	if m != nil {
+		return m.Type
+	}
+	return nil
+}
+
+type RpbGetBucketTypeReq struct {
+	Type             []byte `protobuf:"bytes,1,req,name=type" json:"type,omitempty"`
+	XXX_unrecognized []byte `json:"-"`
+}
+
+func (m *RpbGetBucketTypeReq) Reset()         { *m = RpbGetBucketTypeReq{} }
+func (m *RpbGetBucketTypeReq) String() string { return proto.CompactTextString(m) }
+func (*RpbGetBucketTypeReq) ProtoMessage()    {}
+
+func (m *RpbGetBucketTypeReq) GetType() []byte {
+	if m != nil {
+		return m.Type
+	}
+	return nil
+}
+
+type RpbSetBucketTypeReq struct {
+	Type             []byte          `protobuf:"bytes,1,req,name=type" json:"type,omitempty"`
+	Props            *RpbBucketProps `protobuf:"bytes,2,req,name=props" json:"props,omitempty"`
+	XXX_unrecognized []byte          `json:"-"`
+}
+
+func (m *RpbSetBucketTypeReq) Reset()         { *m = RpbSetBucketTypeReq{} }
+func (m *RpbSetBucketTypeReq) String() string { return proto.CompactTextString(m) }
+func (*RpbSetBucketTypeReq) ProtoMessage()    {}
+
+func (m *RpbSetBucketTypeReq) GetType() []byte {
+	if m != nil {
+		return m.Type
+	}
+	return nil
+}
+
+func (m *RpbSetBucketTypeReq) GetProps() *RpbBucketProps {
+	if m != nil {
+		return m.Props
 	}
 	return nil
 }
@@ -271,7 +335,10 @@ type RpbBucketProps struct {
 	NotfoundOk       *bool                       `protobuf:"varint,21,opt,name=notfound_ok" json:"notfound_ok,omitempty"`
 	Backend          []byte                      `protobuf:"bytes,22,opt,name=backend" json:"backend,omitempty"`
 	Search           *bool                       `protobuf:"varint,23,opt,name=search" json:"search,omitempty"`
-	Repl             *RpbBucketProps_RpbReplMode `protobuf:"varint,24,opt,name=repl,enum=RpbBucketProps_RpbReplMode" json:"repl,omitempty"`
+	Repl             *RpbBucketProps_RpbReplMode `protobuf:"varint,24,opt,name=repl,enum=rpb.RpbBucketProps_RpbReplMode" json:"repl,omitempty"`
+	SearchIndex      []byte                      `protobuf:"bytes,25,opt,name=search_index" json:"search_index,omitempty"`
+	Datatype         []byte                      `protobuf:"bytes,26,opt,name=datatype" json:"datatype,omitempty"`
+	Consistent       *bool                       `protobuf:"varint,27,opt,name=consistent" json:"consistent,omitempty"`
 	XXX_unrecognized []byte                      `json:"-"`
 }
 
@@ -450,6 +517,51 @@ func (m *RpbBucketProps) GetRepl() RpbBucketProps_RpbReplMode {
 	return 0
 }
 
+func (m *RpbBucketProps) GetSearchIndex() []byte {
+	if m != nil {
+		return m.SearchIndex
+	}
+	return nil
+}
+
+func (m *RpbBucketProps) GetDatatype() []byte {
+	if m != nil {
+		return m.Datatype
+	}
+	return nil
+}
+
+func (m *RpbBucketProps) GetConsistent() bool {
+	if m != nil && m.Consistent != nil {
+		return *m.Consistent
+	}
+	return false
+}
+
+type RpbAuthReq struct {
+	User             []byte `protobuf:"bytes,1,req,name=user" json:"user,omitempty"`
+	Password         []byte `protobuf:"bytes,2,req,name=password" json:"password,omitempty"`
+	XXX_unrecognized []byte `json:"-"`
+}
+
+func (m *RpbAuthReq) Reset()         { *m = RpbAuthReq{} }
+func (m *RpbAuthReq) String() string { return proto.CompactTextString(m) }
+func (*RpbAuthReq) ProtoMessage()    {}
+
+func (m *RpbAuthReq) GetUser() []byte {
+	if m != nil {
+		return m.User
+	}
+	return nil
+}
+
+func (m *RpbAuthReq) GetPassword() []byte {
+	if m != nil {
+		return m.Password
+	}
+	return nil
+}
+
 func init() {
-	proto.RegisterEnum("RpbBucketProps_RpbReplMode", RpbBucketProps_RpbReplMode_name, RpbBucketProps_RpbReplMode_value)
+	proto.RegisterEnum("rpb.RpbBucketProps_RpbReplMode", RpbBucketProps_RpbReplMode_name, RpbBucketProps_RpbReplMode_value)
 }

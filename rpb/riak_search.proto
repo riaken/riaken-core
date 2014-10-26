@@ -25,6 +25,9 @@
 ** Revision: 1.4
 */
 
+// Riaken Specific
+package rpb;
+
 import "riak.proto";
 
 // java package specifiers

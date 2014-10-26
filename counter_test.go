@@ -1,7 +1,6 @@
 package riaken_core
 
 import (
-	"os/exec"
 	"testing"
 )
 
@@ -12,8 +11,16 @@ import (
 
 func init() {
 	// Set bucket properties.
-	// Unfortunately these still aren't exposed via PBC, so do it manually with curl.
-	if _, err := exec.Command("curl", "-XPUT", "-H", "content-type:application/json", "http://127.0.0.1:8093/riak/b5", "-d", `{"props":{"allow_mult": true}}`).Output(); err != nil {
+	client := dial()
+	defer client.Close()
+	session := client.Session()
+	defer session.Release()
+
+	opts := &rpb.RpbBucketProps{
+		AllowMult: proto.Bool(true),
+	}
+	bucket := session.GetBucket("b5")
+	if _, err := bucket.SetBucketProps(opts); err != nil {
 		panic(err)
 	}
 }
