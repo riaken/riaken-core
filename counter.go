@@ -47,7 +47,7 @@ func (c *Counter) Update(count int64) (*rpb.RpbCounterUpdateResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	out, err := c.bucket.session.execute(50, in) // RpbCounterUpdateReq
+	out, err := c.bucket.session.execute(Messages["CounterUpdateReq"], in)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func (c *Counter) Get() (*rpb.RpbCounterGetResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	out, err := c.bucket.session.execute(52, in) // RpbCounterGetReq
+	out, err := c.bucket.session.execute(Messages["CounterGetReq"], in)
 	if err != nil {
 		return nil, err
 	}

@@ -52,7 +52,7 @@ func (q *Query) MapReduce(req, ct []byte) (*rpb.RpbMapRedResp, error) {
 		if err != nil {
 			return nil, err
 		}
-		out, err = q.session.execute(23, in) // RpbMapRedReq
+		out, err = q.session.execute(Messages["MapRedReq"], in)
 		if err != nil {
 			return nil, err
 		}
@@ -112,7 +112,7 @@ func (q *Query) SecondaryIndexes(bucket, index, key, start, end []byte, maxResul
 		if err != nil {
 			return nil, err
 		}
-		out, err = q.session.execute(25, in) // RpbIndexReq
+		out, err = q.session.execute(Messages["IndexReq"], in)
 		if err != nil {
 			return nil, err
 		}
@@ -148,7 +148,7 @@ func (q *Query) Search(index, query []byte) (*rpb.RpbSearchQueryResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	out, err := q.session.execute(27, in) // RpbSearchQueryReq
+	out, err := q.session.execute(Messages["SearchQueryReq"], in)
 	if err != nil {
 		return nil, err
 	}

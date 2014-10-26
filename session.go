@@ -146,7 +146,7 @@ func (s *Session) write(data []byte) error {
 }
 
 // execute does the full request/response cycle on a command using a single Node connection instance.
-func (s *Session) execute(code int, in []byte) (interface{}, error) {
+func (s *Session) execute(code byte, in []byte) (interface{}, error) {
 	req, err := rpbWrite(code, in)
 	if err != nil {
 		return nil, err
@@ -211,7 +211,7 @@ func (s *Session) Query() *Query {
 //
 // Riak Docs - Caution: This call can be expensive for the server - do not use in performance sensitive code.
 func (s *Session) ListBuckets() ([]*Bucket, error) {
-	out, err := s.execute(15, nil) // RpbListBucketsReq
+	out, err := s.execute(Messages["ListBucketsReq"], nil)
 	if err != nil {
 		return nil, err
 	}
@@ -227,7 +227,7 @@ func (s *Session) ListBuckets() ([]*Bucket, error) {
 //
 // This method directly influences the state of the node attached to this session.
 func (s *Session) Ping() bool {
-	check, err := s.execute(1, nil) // RpbPingReq
+	check, err := s.execute(Messages["PingReq"], nil)
 	if err != nil {
 		return false
 	}
@@ -236,7 +236,7 @@ func (s *Session) Ping() bool {
 
 // GetClientId gets the id set for this client.
 func (s *Session) GetClientId() (*rpb.RpbGetClientIdResp, error) {
-	out, err := s.execute(3, nil) // RpbGetClientIdReq
+	out, err := s.execute(Messages["GetClientIdReq"], nil)
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +252,7 @@ func (s *Session) SetClientId(id []byte) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	out, err := s.execute(5, in) // RpbSetClientIdReq
+	out, err := s.execute(Messages["SetClientIdReq"], in)
 	if err != nil {
 		return false, err
 	}
@@ -261,7 +261,7 @@ func (s *Session) SetClientId(id []byte) (bool, error) {
 
 // ServerInfo is a method which returns the information for the Riak cluster.
 func (s *Session) ServerInfo() (*rpb.RpbGetServerInfoResp, error) {
-	out, err := s.execute(7, nil) // RpbGetServerInfoReq
+	out, err := s.execute(Messages["GetServerInfoReq"], nil)
 	if err != nil {
 		return nil, err
 	}

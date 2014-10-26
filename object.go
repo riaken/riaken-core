@@ -54,7 +54,7 @@ func (o *Object) Fetch() (*rpb.RpbGetResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	out, err := o.bucket.session.execute(9, in) // RpbGetReq
+	out, err := o.bucket.session.execute(Messages["GetReq"], in)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (o *Object) Store(data []byte) (*rpb.RpbPutResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	out, err := o.bucket.session.execute(11, in) // RpbPutReq
+	out, err := o.bucket.session.execute(Messages["PutReq"], in)
 	if err != nil {
 		return nil, err
 	}
@@ -121,7 +121,7 @@ func (o *Object) Delete() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	out, err := o.bucket.session.execute(13, in) // RpbDelReq
+	out, err := o.bucket.session.execute(Messages["DelReq"], in)
 	if err != nil {
 		return false, err
 	}
