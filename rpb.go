@@ -108,6 +108,22 @@ func rpbRead(data []byte) (interface{}, error) {
 			return nil, err
 		}
 		return out, nil
+	case 30: // RbpResetBucketResp
+		return true, nil
+	case 32: // RbpSetBucketTypeResp
+		out := &rpb.RpbSetBucketTypeReq{}
+		err := proto.Unmarshal(data, out)
+		if err != nil {
+			return nil, err
+		}
+		return out, nil
+	case 40: // RbpCSBucketReq
+		out := &rpb.RpbCSBucketReq{}
+		err := proto.Unmarshal(data, out)
+		if err != nil {
+			return nil, err
+		}
+		return out, nil
 	case 51: // RpbCounterUpdateResp
 		out := &rpb.RpbCounterUpdateResp{}
 		err := proto.Unmarshal(data, out)
@@ -117,6 +133,36 @@ func rpbRead(data []byte) (interface{}, error) {
 		return out, nil
 	case 53: // RpbCounterGetResp
 		out := &rpb.RpbCounterGetResp{}
+		err := proto.Unmarshal(data, out)
+		if err != nil {
+			return nil, err
+		}
+		return out, nil
+	case 55: // RbpYokozunaIndexGetResp
+		out := &rpb.RpbYokozunaIndexGetResp{}
+		err := proto.Unmarshal(data, out)
+		if err != nil {
+			return nil, err
+		}
+		return out, nil
+	case 57: // RbpYokozunaIndexPutResp
+		return true, nil
+	case 59: // RbpYokozunaIndexSchemaGetResp
+		out := &rpb.RpbYokozunaSchemaGetResp{}
+		err := proto.Unmarshal(data, out)
+		if err != nil {
+			return nil, err
+		}
+		return out, nil
+	case 81: // DtFetchResp
+		out := &rpb.DtFetchResp{}
+		err := proto.Unmarshal(data, out)
+		if err != nil {
+			return nil, err
+		}
+		return out, nil
+	case 83: // DtUpdateResp
+		out := &rpb.DtUpdateResp{}
 		err := proto.Unmarshal(data, out)
 		if err != nil {
 			return nil, err
