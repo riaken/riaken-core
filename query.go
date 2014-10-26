@@ -2,9 +2,7 @@ package riaken_core
 
 import (
 	"errors"
-)
 
-import (
 	"code.google.com/p/goprotobuf/proto"
 	"github.com/riaken/riaken-core/rpb"
 )

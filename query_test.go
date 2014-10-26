@@ -3,9 +3,7 @@ package riaken_core
 import (
 	"regexp"
 	"testing"
-)
 
-import (
 	"github.com/riaken/riaken-core/rpb"
 )
 
