@@ -12,10 +12,6 @@ type Bucket struct {
 	btype       []byte   // track the bucket type
 }
 
-func (b *Bucket) reset() {
-	b.btype = []byte{}
-}
-
 // Type allows the bucket type to be set.  Chains with additional methods.
 func (b *Bucket) Type(t []byte) *Bucket {
 	b.btype = t
@@ -64,14 +60,12 @@ func (b *Bucket) ListKeys() (*rpb.RpbListKeysResp, error) {
 	}
 	if out.(*rpb.RpbListKeysResp).GetDone() {
 		b.streamState = 0
-		b.reset() // reset only after done
 	}
 	return out.(*rpb.RpbListKeysResp), nil
 }
 
 // GetBucketProps returns the properties for this bucket.
 func (b *Bucket) GetBucketProps() (*rpb.RpbGetBucketResp, error) {
-	defer b.reset()
 	opts := &rpb.RpbGetBucketReq{
 		Bucket: []byte(b.name),
 	}
@@ -85,7 +79,6 @@ func (b *Bucket) GetBucketProps() (*rpb.RpbGetBucketResp, error) {
 
 // SetBucketProps set the properties for this bucket using RpbBucketProps.
 func (b *Bucket) SetBucketProps(props *rpb.RpbBucketProps) (bool, error) {
-	defer b.reset()
 	opts := &rpb.RpbSetBucketReq{
 		Bucket: []byte(b.name),
 		Props:  props,
@@ -105,7 +98,6 @@ func (b *Bucket) SetBucketProps(props *rpb.RpbBucketProps) (bool, error) {
 //
 // Setting an empty key string will result in a server generated key.
 func (b *Bucket) Object(key string) *Object {
-	defer b.reset()
 	return &Object{
 		bucket: b,
 		key:    key,
@@ -114,8 +106,15 @@ func (b *Bucket) Object(key string) *Object {
 
 // Counter returns a new counter associated with this bucket using key.
 func (b *Bucket) Counter(key string) *Counter {
-	defer b.reset()
 	return &Counter{
+		bucket: b,
+		key:    key,
+	}
+}
+
+// Crdt returns a new CRDT object associated with this bucket using key.
+func (b *Bucket) Crdt(key string) *Crdt {
+	return &Crdt{
 		bucket: b,
 		key:    key,
 	}

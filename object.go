@@ -48,6 +48,9 @@ func (o *Object) Fetch() (*rpb.RpbGetResp, error) {
 	}
 	opts.Bucket = []byte(o.bucket.name)
 	opts.Key = []byte(o.key)
+	if opts.Type == nil {
+		opts.Type = o.bucket.btype
+	}
 	in, err := proto.Marshal(opts)
 	if err != nil {
 		return nil, err
@@ -76,6 +79,9 @@ func (o *Object) Store(data []byte) (*rpb.RpbPutResp, error) {
 	opts.Bucket = []byte(o.bucket.name)
 	if o.key != "" {
 		opts.Key = []byte(o.key)
+	}
+	if opts.Type == nil {
+		opts.Type = o.bucket.btype
 	}
 	if opts.Content == nil {
 		opts.Content = &rpb.RpbContent{
@@ -112,6 +118,9 @@ func (o *Object) Delete() (bool, error) {
 	}
 	opts.Bucket = []byte(o.bucket.name)
 	opts.Key = []byte(o.key)
+	if opts.Type == nil {
+		opts.Type = o.bucket.btype
+	}
 	if opts.Vclock == nil {
 		opts.Vclock = o.vclock
 	}
