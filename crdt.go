@@ -290,6 +290,7 @@ func (m *CrdtMap) Commit() (*rpb.DtUpdateResp, error) {
 	}
 	res, err := m.crdt.Do(opts).Update()
 	m.unpack(m.crdt, res.GetMapValue())
+	m.remove = CrdtMapRemove{} // reset
 	return res, err
 }
 
