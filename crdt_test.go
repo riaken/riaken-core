@@ -160,6 +160,8 @@ func TestCrdtMap(t *testing.T) {
 	mp.Maps["m1"].Sets["ss1"].Add("222")
 	mp.Maps["m1"].Maps["mm1"] = crdt.NewMap()
 	mp.Maps["m1"].Maps["mm1"].Flags["fff1"] = false
+	mp.Maps["m1"].Maps["mm2"] = crdt.NewMap()
+	mp.Maps["m1"].Maps["mm2"].Registers["123"] = "abc"
 	if _, err := mp.Commit(); err != nil {
 		t.Fatal(err.Error())
 	}
@@ -216,12 +218,29 @@ func TestCrdtMap(t *testing.T) {
 		}
 	}
 
+	if m1, ok := crdt.Map.Maps["m1"]; !ok {
+		t.Error("expected map->maps->m1 to exist")
+	} else {
+		if m2, ok := m1.Maps["mm2"]; !ok {
+			t.Error("expected map->maps->mm2 to exist")
+		} else {
+			if r, ok := m2.Registers["123"]; !ok {
+				t.Error("expected map->maps->mm2->registers->123 to exist")
+			} else {
+				if r != "abc" {
+					t.Error("register should be abc")
+				}
+			}
+		}
+	}
+
 	// Change Values
 	crdt.Map.Flags["f1"] = false
 	crdt.Map.Remove(CRDT_MAP_REGISTER, "r2")
 	crdt.Map.Counters["c1"].Decrement(6)
 	crdt.Map.Sets["s1"].Remove("1")
 	crdt.Map.Maps["m1"].Registers["rr1"] = "rr1rr"
+	crdt.Map.Maps["m1"].Remove(CRDT_MAP_MAP, "mm2")
 	if _, err := crdt.Map.Commit(); err != nil {
 		t.Fatal(err.Error())
 	}
@@ -271,6 +290,14 @@ func TestCrdtMap(t *testing.T) {
 			t.Error("expected map->maps->m1->registers->rr1 to exist")
 		} else if r != "rr1rr" {
 			t.Errorf("expected: %s, got: %s", "rr1rr", r)
+		}
+	}
+
+	if m1, ok := crdt.Map.Maps["m1"]; !ok {
+		t.Error("expected map->maps->m1 to exist")
+	} else {
+		if _, ok := m1.Maps["mm2"]; ok {
+			t.Error("map->maps->m1->maps->mm2 should not exist")
 		}
 	}
 
