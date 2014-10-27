@@ -195,6 +195,7 @@ func (s *Session) GetBucket(name string) *Bucket {
 	return &Bucket{
 		session: s,
 		name:    name,
+		btype:   []byte("default"), // Riak automatically uses the 'default' namespace for buckets
 	}
 }
 
