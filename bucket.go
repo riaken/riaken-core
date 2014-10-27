@@ -13,8 +13,8 @@ type Bucket struct {
 }
 
 // Type allows the bucket type to be set.  Chains with additional methods.
-func (b *Bucket) Type(t []byte) *Bucket {
-	b.btype = t
+func (b *Bucket) Type(t string) *Bucket {
+	b.btype = []byte(t)
 	return b
 }
 
@@ -88,6 +88,40 @@ func (b *Bucket) SetBucketProps(props *rpb.RpbBucketProps) (bool, error) {
 		return false, err
 	}
 	out, err := b.session.execute(Messages["SetBucketReq"], in)
+	if err != nil {
+		return false, err
+	}
+	return out.(bool), nil
+}
+
+// SetBucketType sets the type for this bucket (set via Type()) along with optional RpbBucketProps.
+func (b *Bucket) SetBucketType(props *rpb.RpbBucketProps) (bool, error) {
+	opts := &rpb.RpbSetBucketTypeReq{
+		Type:  []byte(b.btype),
+		Props: props,
+	}
+	in, err := proto.Marshal(opts)
+	if err != nil {
+		return false, err
+	}
+	out, err := b.session.execute(Messages["SetBucketTypeReq"], in)
+	if err != nil {
+		return false, err
+	}
+	return out.(bool), nil
+}
+
+// ResetBucket resets the bucket type for bucket with type set via Type().
+func (b *Bucket) ResetBucket() (bool, error) {
+	opts := &rpb.RpbResetBucketReq{
+		Bucket: []byte(b.name),
+		Type:   []byte(b.btype),
+	}
+	in, err := proto.Marshal(opts)
+	if err != nil {
+		return false, err
+	}
+	out, err := b.session.execute(Messages["ResetBucketReq"], in)
 	if err != nil {
 		return false, err
 	}

@@ -4,11 +4,27 @@ Go Protocol Buffer driver for the Riak distributed database
 
 ## Install
 
+### Development
+
     go get github.com/riaken/riaken-core
+
+### 2.0.x Compatible
+
+### 1.4.x Compatible
+
+    go get http://gopkg.in/riaken/riaken-core.v1
 
 ## Documentation
 
+### Development
+
 http://godoc.org/github.com/riaken/riaken-core
+
+### 2.0.x
+
+### 1.4.x
+
+http://godoc.org/gopkg.in/riaken/riaken-core.v1
 
 ## Extended Riaken
 
@@ -16,13 +32,6 @@ There are some modules which wrap/extend/test Riaken located at the following:
 
 * https://github.com/riaken/riaken-struct - Wraps core with higher level struct functionality.
 * https://github.com/riaken/riaken-test - Does integration testing against core and struct.
-
-## Alternatives
-
-For the record there are two existing mature Go PBC libraries.
-
-* https://github.com/mrb/riakpbc - A collaboration between Michael Bernstein and myself.
-* https://github.com/tpjg/goriakpbc - Ruby inspired, seems feature complete.
 
 ## Philosophy
 
@@ -108,6 +117,12 @@ Get useful info about the Riak servers.
 
 ### Bucket Operations
 
+Buckets now have a recommended Type() method which allows for another level of namespacing.
+
+    bucket := session.GetBucket("bucket").Type("high_level")
+
+The type is set to `default` by Riak if not specified.
+
 #### Set Bucket Properties
 
 Not exactly straightforward because they require the use of the RPB structs.
@@ -138,6 +153,27 @@ Not exactly straightforward because they require the use of the RPB structs.
 	}
 	if out.GetProps().GetAllowMult() != true {
 		log.Errorf("expected: true, got: %t", out.GetProps().GetAllowMult())
+	}
+
+#### Set Bucket Type
+
+	bucket := session.GetBucket("b2").Type("test_maps")
+	props := &rpb.RpbBucketProps{
+		AllowMult: proto.Bool(true),
+	}
+	if ok, err := bucket.SetBucketType(props); !ok {
+		t.Error("could not set bucket props")
+	} else if err != nil {
+		t.Error(err.Error())
+	}
+
+#### Reset Bucket
+
+	bucket := session.GetBucket("b2").Type("test_maps")
+	if ok, err := bucket.ResetBucket(); !ok {
+		t.Error("could not set bucket props")
+	} else if err != nil {
+		t.Error(err.Error())
 	}
 
 #### List Keys
@@ -222,6 +258,123 @@ Simple version.
 		t.Error(err.Error())
 	}
 	log.Print(data.GetValue())
+
+### CRDTs
+
+CRDTs can be queried similar to an Object.
+
+	crdt := bucket.Crdt("foo")
+	if _, err := crdt.Fetch(); err != nil {
+		t.Fatal(err.Error())
+	}
+
+They will then have their Counter, Set, or Map value set depending on what was initially stored in Riak.
+
+    // crdt.Counter
+    // crdt.Set
+    // crdt.Map
+
+They are simply deleted with the Object interface.
+
+	object := bucket.Object("foo")
+	if _, err := object.Delete(); err != nil {
+		t.Fatal(err.Error())
+	}
+
+#### Counters
+
+	bucket := session.GetBucket("crdt_counter").Type("test_counters")
+	counter := bucket.Crdt("foo").NewCounter()
+	counter.Increment(4)
+	if _, err := counter.Commit(); err != nil {
+		t.Fatal(err.Error())
+	}
+	counter.Decrement(1)
+	if _, err := counter.Commit(); err != nil {
+		t.Fatal(err.Error())
+	}
+	log.Print(counter.Value) // should equal 3
+
+#### Sets
+
+	bucket := session.GetBucket("crdt_set").Type("test_sets")
+	set := bucket.Crdt("foo").NewSet()
+	set.Add("bar")
+	set.Add("baz")
+	if _, err := set.Commit(); err != nil {
+		t.Fatal(err.Error())
+	}
+	log.Print(set.Values) // should contain ["bar", "baz"]
+	set.Remove("baz")
+	set.Add("car")
+	if _, err := set.Commit(); err != nil {
+		t.Fatal(err.Error())
+	}
+	log.Print(set.Values) // should contain ["bar", "car"]
+
+#### Maps
+
+Maps contain:
+
+* Flags
+* Registers
+* Counters
+* Sets
+* Maps
+
+	bucket := session.GetBucket("crdt_map").Type("test_maps")
+	crdt := bucket.Crdt("foo")
+	mp := crdt.NewMap()
+
+	// Add Flags
+	mp.Flags["f1"] = true
+	mp.Flags["f2"] = false
+
+	// Add Registers
+	mp.Registers["r1"] = "1r"
+	mp.Registers["r2"] = "2r"
+
+	// Add Counters
+	mp.Counters["c1"] = crdt.NewCounter()
+	mp.Counters["c1"].Increment(10)
+
+	// Add Sets
+	mp.Sets["s1"] = crdt.NewSet()
+	mp.Sets["s1"].Add("1")
+	mp.Sets["s1"].Add("2")
+	mp.Sets["s1"].Add("3")
+	mp.Sets["s2"] = crdt.NewSet()
+	mp.Sets["s2"].Add("a")
+	mp.Sets["s2"].Add("b")
+
+	// Add Maps (within Maps, within...)
+	mp.Maps["m1"] = crdt.NewMap()
+	mp.Maps["m1"].Flags["ff1"] = true
+	mp.Maps["m1"].Registers["rr1"] = "1rr"
+	mp.Maps["m1"].Counters["cc1"] = crdt.NewCounter()
+	mp.Maps["m1"].Counters["cc1"].Increment(20)
+	mp.Maps["m1"].Sets["ss1"] = crdt.NewSet()
+	mp.Maps["m1"].Sets["ss1"].Add("111")
+	mp.Maps["m1"].Sets["ss1"].Add("222")
+	mp.Maps["m1"].Maps["mm1"] = crdt.NewMap()
+	mp.Maps["m1"].Maps["mm1"].Flags["fff1"] = false
+
+	// Save
+	if _, err := mp.Commit(); err != nil {
+		t.Fatal(err.Error())
+	}
+
+Values can be removed from Maps with Remove():
+
+	crdt := bucket.Crdt("foo")
+	if _, err := crdt.Fetch(); err != nil {
+		t.Fatal(err.Error())
+	}
+    crdt.Remove(CRDT_MAP_FLAG, "f2")
+	if _, err := mp.Commit(); err != nil {
+		t.Fatal(err.Error())
+	}
+    // crdt.Map.Flags["f2"] should no longer exist
 
 ### Query Operations
 
@@ -327,8 +480,6 @@ See the [Riak PBC docs](http://docs.basho.com/riak/latest/dev/references/protoco
 ## Author
 
 Brian Jones - mojobojo@gmail.com - https://twitter.com/mojobojo
-
-Special thanks to Michael Bernstein.  This project would not have been possible without the blood and sweat of our collaboration on mrb/riakpbc.
 
 ## License
 

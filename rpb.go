@@ -183,12 +183,7 @@ func rpbRead(data []byte) (interface{}, error) {
 	case Messages["ResetBucketResp"]:
 		return true, nil
 	case Messages["SetBucketTypeResp"]:
-		out := &rpb.RpbSetBucketTypeReq{}
-		err := proto.Unmarshal(data, out)
-		if err != nil {
-			return nil, err
-		}
-		return out, nil
+		return true, nil
 	case Messages["CSBucketResp"]:
 		out := &rpb.RpbCSBucketResp{}
 		err := proto.Unmarshal(data, out)

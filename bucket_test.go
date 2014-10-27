@@ -64,3 +64,34 @@ func TestBucketSetGetProps(t *testing.T) {
 		t.Errorf("expected: true, got: %t", out.GetProps().GetAllowMult())
 	}
 }
+
+func TestBucketSetBucketType(t *testing.T) {
+	client := dial()
+	defer client.Close()
+	session := client.Session()
+	defer session.Release()
+
+	bucket := session.GetBucket("b2").Type("test_maps")
+	props := &rpb.RpbBucketProps{
+		AllowMult: proto.Bool(true),
+	}
+	if ok, err := bucket.SetBucketType(props); !ok {
+		t.Error("could not set bucket props")
+	} else if err != nil {
+		t.Error(err.Error())
+	}
+}
+
+func TestBucketResetBucket(t *testing.T) {
+	client := dial()
+	defer client.Close()
+	session := client.Session()
+	defer session.Release()
+
+	bucket := session.GetBucket("b2").Type("test_maps")
+	if ok, err := bucket.ResetBucket(); !ok {
+		t.Error("could not set bucket props")
+	} else if err != nil {
+		t.Error(err.Error())
+	}
+}
