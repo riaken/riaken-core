@@ -18,7 +18,7 @@ Go Protocol Buffer driver for the Riak distributed database
 
 ### Development
 
-http://godoc.org/github.com/riaken/riaken-core
+http://godoc.org/gopkg.in/riaken/riaken-core.v1
 
 ### 2.0.x
 
