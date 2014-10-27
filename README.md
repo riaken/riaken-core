@@ -322,6 +322,8 @@ Maps contain:
 * Sets
 * Maps
 
+They are used in the following way:
+
 	bucket := session.GetBucket("crdt_map").Type("test_maps")
 	crdt := bucket.Crdt("foo")
 	mp := crdt.NewMap()
