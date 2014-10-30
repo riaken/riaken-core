@@ -39,6 +39,7 @@ func (b *Bucket) ListKeys() (*rpb.RpbListKeysResp, error) {
 	switch b.streamState {
 	case 0:
 		opts := &rpb.RpbListKeysReq{
+			Type:   b.btype,
 			Bucket: []byte(b.name),
 		}
 		in, err := proto.Marshal(opts)
@@ -67,6 +68,7 @@ func (b *Bucket) ListKeys() (*rpb.RpbListKeysResp, error) {
 // GetBucketProps returns the properties for this bucket.
 func (b *Bucket) GetBucketProps() (*rpb.RpbGetBucketResp, error) {
 	opts := &rpb.RpbGetBucketReq{
+		Type:   b.btype,
 		Bucket: []byte(b.name),
 	}
 	in, err := proto.Marshal(opts)
@@ -80,6 +82,7 @@ func (b *Bucket) GetBucketProps() (*rpb.RpbGetBucketResp, error) {
 // SetBucketProps set the properties for this bucket using RpbBucketProps.
 func (b *Bucket) SetBucketProps(props *rpb.RpbBucketProps) (bool, error) {
 	opts := &rpb.RpbSetBucketReq{
+		Type:   b.btype,
 		Bucket: []byte(b.name),
 		Props:  props,
 	}
@@ -97,7 +100,7 @@ func (b *Bucket) SetBucketProps(props *rpb.RpbBucketProps) (bool, error) {
 // SetBucketType sets the type for this bucket (set via Type()) along with optional RpbBucketProps.
 func (b *Bucket) SetBucketType(props *rpb.RpbBucketProps) (bool, error) {
 	opts := &rpb.RpbSetBucketTypeReq{
-		Type:  []byte(b.btype),
+		Type:  b.btype,
 		Props: props,
 	}
 	in, err := proto.Marshal(opts)
@@ -114,8 +117,8 @@ func (b *Bucket) SetBucketType(props *rpb.RpbBucketProps) (bool, error) {
 // ResetBucket resets the bucket type for bucket with type set via Type().
 func (b *Bucket) ResetBucket() (bool, error) {
 	opts := &rpb.RpbResetBucketReq{
+		Type:   b.btype,
 		Bucket: []byte(b.name),
-		Type:   []byte(b.btype),
 	}
 	in, err := proto.Marshal(opts)
 	if err != nil {
