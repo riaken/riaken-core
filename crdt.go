@@ -55,11 +55,18 @@ func (s *CrdtSet) set(values [][]byte) {
 // Add a new value to the set.
 func (s *CrdtSet) Add(data string) {
 	s.adds = append(s.adds, []byte(data))
+	s.Values = append(s.Values, data)
 }
 
 // Remove a value from the set.
 func (s *CrdtSet) Remove(data string) {
 	s.removes = append(s.removes, []byte(data))
+	for i, v := range s.Values {
+		if v == data {
+			s.Values = append(s.Values[:i], s.Values[i+1:]...)
+			break
+		}
+	}
 }
 
 // Commit changes to the database.
