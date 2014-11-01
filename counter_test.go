@@ -7,6 +7,21 @@ import (
 	"github.com/riaken/riaken-core/rpb"
 )
 
+func init() {
+	client := dial()
+	defer client.Close()
+	session := client.Session()
+	defer session.Release()
+
+	bucket := session.GetBucket("b5")
+	props := &rpb.RpbBucketProps{
+		AllowMult: proto.Bool(true),
+	}
+	if _, err := bucket.SetBucketProps(props); err != nil {
+		panic(err.Error())
+	}
+}
+
 func TestCounter(t *testing.T) {
 	client := dial()
 	defer client.Close()
