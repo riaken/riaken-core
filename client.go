@@ -63,14 +63,12 @@ func (c *Client) check() {
 		select {
 		case <-time.After(PING_RATE):
 			for i := 0; i < len(c.cluster); i++ {
-				go func() {
-					s := c.fetch()
-					s.active = s.Ping()
-					if !s.Available() {
-						s.check()
-					}
-					c.release(s)
-				}()
+				s := c.fetch()
+				s.active = s.Ping()
+				if !s.Available() {
+					s.check()
+				}
+				c.release(s)
 			}
 		case <-c.shutdown:
 			return

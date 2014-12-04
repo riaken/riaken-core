@@ -22,7 +22,6 @@ type Session struct {
 	addr   string       // address this node is associated with
 	conn   *net.TCPConn // connection
 	active bool         // whether connection is active or not
-	state  bool         // true - available, false - shutdown
 	debug  bool         // debugging info
 }
 
@@ -30,7 +29,6 @@ func NewSession(client *Client, addr string) *Session {
 	return &Session{
 		Client: client,
 		addr:   addr,
-		state:  true,
 	}
 }
 
@@ -46,7 +44,7 @@ func (s *Session) Dial() error {
 		if s.debug {
 			log.Print(err.Error())
 		}
-		s.active = false
+		s.Close()
 	} else {
 		if s.debug {
 			log.Printf("connected to: %s", s.addr)
@@ -77,7 +75,7 @@ func (s *Session) check() {
 }
 
 func (s *Session) Available() bool {
-	return (s.conn != nil && s.active && s.state)
+	return (s.conn != nil && s.active)
 }
 
 func (s *Session) Release() {
@@ -87,7 +85,6 @@ func (s *Session) Release() {
 // Close the underlying net connection and set this session to inactive.
 func (s *Session) Close() {
 	s.active = false
-	s.state = false
 	if s.conn != nil {
 		s.conn.Close()
 	}
