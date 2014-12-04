@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-const PING_RATE time.Duration = time.Second * 5
+const PingRate time.Duration = time.Second * 10
 
 var ErrAllNodesDown error = errors.New("all nodes appear to be down")
 
@@ -61,7 +61,7 @@ func (c *Client) Dial() error {
 func (c *Client) check() {
 	for {
 		select {
-		case <-time.After(PING_RATE):
+		case <-time.After(PingRate):
 			for i := 0; i < len(c.cluster); i++ {
 				s := c.fetch()
 				s.active = s.Ping()
@@ -88,12 +88,18 @@ func (c *Client) Close() {
 
 // Session returns a new session.
 func (c *Client) Session() *Session {
+	count := len(c.cluster)
 	for {
 		s := c.fetch()
 		if s.Available() {
 			return s
 		}
 		c.release(s)
+
+		count--
+		if count == 0 {
+			break
+		}
 	}
 	return nil
 }
