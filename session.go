@@ -18,17 +18,17 @@ var ErrCannotRead error = errors.New("cannot read from a non-active or closed co
 var ErrCannotWrite error = errors.New("cannot write to a non-active or closed connection")
 
 type Session struct {
-	Client *Client      // reference back to client
-	addr   string       // address this node is associated with
-	conn   *net.TCPConn // connection
-	active bool         // whether connection is active or not
-	debug  bool         // debugging info
+	addr    string        // address this node is associated with
+	conn    *net.TCPConn  // connection
+	active  bool          // whether connection is active or not
+	cluster chan *Session // access to the client's cluster channel
+	debug   bool          // debugging info
 }
 
-func NewSession(client *Client, addr string) *Session {
+func NewSession(cluster chan *Session, addr string) *Session {
 	return &Session{
-		Client: client,
-		addr:   addr,
+		addr:    addr,
+		cluster: cluster,
 	}
 }
 
@@ -89,7 +89,7 @@ func (s *Session) Release() {
 			log.Println("Release: session paniced")
 		}
 	}()
-	s.Client.release(s)
+	s.cluster <- s
 }
 
 // Close the underlying net connection and set this session to inactive.

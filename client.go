@@ -24,7 +24,7 @@ func NewClient(addrs []string, max int) *Client {
 	}
 	for _, addr := range addrs {
 		for i := 0; i < max; i++ {
-			client.cluster <- NewSession(client, addr)
+			client.cluster <- NewSession(client.cluster, addr)
 		}
 	}
 	return client
@@ -40,7 +40,7 @@ func (c *Client) Debug(debug bool) {
 func (c *Client) Dial() error {
 	down := 0
 	for i := 0; i < len(c.cluster); i++ {
-		s := c.fetch()
+		s := <-c.cluster
 		s.debug = c.debug
 		if err := s.Dial(); err != nil {
 			down++
@@ -48,7 +48,7 @@ func (c *Client) Dial() error {
 				log.Print(err.Error())
 			}
 		}
-		c.release(s)
+		c.cluster <- s
 	}
 	if down == len(c.cluster) {
 		return ErrAllNodesDown
@@ -63,12 +63,14 @@ func (c *Client) check() {
 		select {
 		case <-time.After(PingRate):
 			for i := 0; i < len(c.cluster); i++ {
-				s := c.fetch()
-				s.active = s.Ping()
-				if !s.Available() {
-					s.check()
-				}
-				c.release(s)
+				go func() {
+					s := <-c.cluster
+					s.active = s.Ping()
+					if !s.Available() {
+						s.check()
+					}
+					c.cluster <- s
+				}()
 			}
 		case <-c.shutdown:
 			return
@@ -80,9 +82,9 @@ func (c *Client) check() {
 func (c *Client) Close() {
 	c.shutdown <- true
 	for i := 0; i < len(c.cluster); i++ {
-		s := c.fetch()
+		s := <-c.cluster
 		s.Close()
-		c.release(s)
+		c.cluster <- s
 	}
 }
 
@@ -90,11 +92,11 @@ func (c *Client) Close() {
 func (c *Client) Session() *Session {
 	count := len(c.cluster)
 	for {
-		s := c.fetch()
+		s := <-c.cluster
 		if s.Available() {
 			return s
 		}
-		c.release(s)
+		c.cluster <- s
 
 		count--
 		if count == 0 {
@@ -102,12 +104,4 @@ func (c *Client) Session() *Session {
 		}
 	}
 	return nil
-}
-
-func (c *Client) fetch() *Session {
-	return <-c.cluster
-}
-
-func (c *Client) release(s *Session) {
-	c.cluster <- s
 }
