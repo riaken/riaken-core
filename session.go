@@ -75,10 +75,20 @@ func (s *Session) check() {
 }
 
 func (s *Session) Available() bool {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("Available: session paniced")
+		}
+	}()
 	return (s.conn != nil && s.active)
 }
 
 func (s *Session) Release() {
+	defer func() {
+		if err := recover(); err != nil {
+			log.Println("Release: session paniced")
+		}
+	}()
 	s.Client.release(s)
 }
 
