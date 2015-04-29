@@ -130,7 +130,7 @@ Not exactly straightforward because they require the use of the RPB structs.
 	// Make sure to require this
 	import (
 		"github.com/riaken/riaken-core/rpb"
-		"code.google.com/p/goprotobuf/proto"
+		"github.com/golang/protobuf/proto"
 	)
 
 	// Code
@@ -434,7 +434,7 @@ Sometimes it is desirable to pass more complex options to the server.  All metho
 	// Make sure to require this
 	import (
 		"github.com/riaken/riaken-core/rpb"
-		"code.google.com/p/goprotobuf/proto"
+		"github.com/golang/protobuf/proto"
 	)
 
 	// Code
