@@ -10,7 +10,7 @@ import (
 	"net"
 	"syscall"
 
-	"code.google.com/p/goprotobuf/proto"
+	"github.com/golang/protobuf/proto"
 	"github.com/riaken/riaken-core/rpb"
 )
 
