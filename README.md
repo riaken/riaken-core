@@ -1,3 +1,8 @@
+## Note: 
+This code influeneced the Go client that's **now maintained by [Basho](http://basho.com)**, the creators of Riak. You can contribute [to the repository here](https://github.com/basho/riak-go-client) or install with `go get github.com/basho/riak-go-client`.
+
+---
+
 ## Riaken
 
 Go Protocol Buffer driver for the Riak distributed database
